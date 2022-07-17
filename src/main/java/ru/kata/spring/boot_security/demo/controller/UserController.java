@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,15 +23,15 @@ public class UserController {
     }
 
     @GetMapping("admin")
-    public String admin(Model model) {
+    public String getAdminPage(Model model) {
         List<User> allUsers = service.getAllUsers();
         model.addAttribute("users", allUsers);
         return "users";
     }
 
-    @GetMapping("user/{login}")
-    public String user(Model model, @PathVariable("login") String login) {
-        model.addAttribute("user", service.getUserByLogin(login));
+    @GetMapping("user")
+    public String getUserPage(Model model, @AuthenticationPrincipal User user) {
+        model.addAttribute("user", service.getUserByLogin(user.getLogin()));
         return "user";
     }
 
@@ -49,7 +50,7 @@ public class UserController {
     }
 
     @DeleteMapping("admin/delete/{id}")
-    public String delete(@PathVariable("id") int userId) {
+    public String deleteUser(@PathVariable("id") int userId) {
         service.deleteUserById(userId);
 
         return "redirect:/admin";

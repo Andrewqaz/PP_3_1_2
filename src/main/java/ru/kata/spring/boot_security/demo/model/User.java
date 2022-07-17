@@ -2,15 +2,17 @@ package ru.kata.spring.boot_security.demo.model;
 
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -76,6 +78,7 @@ public class User {
         this.password = password;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -108,6 +111,50 @@ public class User {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getUsername() {
+        return login;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return status.equals("ACTIVE");
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return status.equals("ACTIVE");
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return status.equals("ACTIVE");
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return status.equals("ACTIVE");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id == user.id && login.equals(user.login)
+                && password.equals(user.password)
+                && Objects.equals(firstName, user.firstName)
+                && Objects.equals(lastName, user.lastName)
+                && Objects.equals(email, user.email)
+                && Objects.equals(status, user.status)
+                && Objects.equals(roles, user.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login, password, firstName, lastName, email, status, roles);
     }
 
     @Override
